@@ -231,4 +231,7 @@
     <!-- Gaming Mode FPSInfoService FPS node file path -->
     <java-symbol type="string" name="config_gamingmode_fpsInfoSysNode" />
 
+    <!-- Whether the device supports Smart Pixels -->
+    <java-symbol type="bool" name="config_supportSmartPixels" />
+
 </resources>
