@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.input.InputManager;
+import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -233,5 +234,11 @@ public class SyberiaUtils {
                 }
             }
         }
+    }
+
+    public static boolean deviceHasCompass(Context ctx) {
+            SensorManager sm = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
+            return sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
+                    && sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null;
     }
 }
