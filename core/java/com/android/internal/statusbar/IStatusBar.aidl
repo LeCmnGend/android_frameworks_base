@@ -242,4 +242,10 @@ oneway interface IStatusBar
     void killForegroundApp();
     void screenPinningStateChanged(boolean enabled);
     void leftInLandscapeChanged(boolean isLeft);
+
+    /**
+     *  Used to show or hide in display fingerprint view.
+     */
+    void showInDisplayFingerprintView();
+    void hideInDisplayFingerprintView();
 }

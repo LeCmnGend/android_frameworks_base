@@ -117,6 +117,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         @Override
         public void onStartingToShow() {
+            updateStates();
             updateLockIcon();
         }
 
@@ -166,6 +167,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected boolean mLastShowing;
     protected boolean mLastOccluded;
     private boolean mLastBouncerShowing;
+    private boolean mLastBouncerInTransit;
     private boolean mLastBouncerDismissible;
     protected boolean mLastRemoteInputActive;
     private boolean mLastDozing;
@@ -817,6 +819,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean showing = mShowing;
         boolean occluded = mOccluded;
         boolean bouncerShowing = mBouncer.isShowing();
+        boolean bouncerInTransit = mBouncer.inTransit();
         boolean bouncerDismissible = !mBouncer.isFullscreenBouncer();
         boolean remoteInputActive = mRemoteInputActive;
         isHideLockIcon = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -847,8 +850,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if ((showing && !occluded) != (mLastShowing && !mLastOccluded) || mFirstUpdate) {
             mKeyguardUpdateManager.onKeyguardVisibilityChanged(showing && !occluded);
         }
-        if (bouncerShowing != mLastBouncerShowing || mFirstUpdate) {
-            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerShowing);
+
+        boolean bouncerVisible = bouncerShowing || bouncerInTransit;
+        boolean lastBouncerVisible = mLastBouncerShowing || mLastBouncerInTransit;
+        if (bouncerVisible != lastBouncerVisible || mFirstUpdate) {
+            mKeyguardUpdateManager.sendKeyguardBouncerChanged(bouncerVisible);
         }
 
         mFirstUpdate = false;
@@ -856,6 +862,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastGlobalActionsVisible = mGlobalActionsVisible;
         mLastOccluded = occluded;
         mLastBouncerShowing = bouncerShowing;
+        mLastBouncerInTransit = bouncerInTransit;
         mLastBouncerDismissible = bouncerDismissible;
         mLastRemoteInputActive = remoteInputActive;
         mLastDozing = mDozing;

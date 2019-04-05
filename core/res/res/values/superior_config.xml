@@ -135,5 +135,8 @@
     <!-- Should we filter any display modes which are unmapped? -->
     <bool name="config_filterDisplayModes">false</bool>
 
+    <!-- Whether to show a custom view for FOD -->
+    <bool name="config_needCustomFODView">false</bool>
+
 </resources>
 
