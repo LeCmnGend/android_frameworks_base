@@ -192,4 +192,8 @@
 
     <!-- Change clockface -->
     <string name="change_clock_face">Swipe to change the clock face</string>
+
+    <!-- Channel name for Battery notifications -->
+    <string name="battery_notification_channel_tv">Battery warning</string>
+
 </resources>
