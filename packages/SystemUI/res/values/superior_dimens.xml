@@ -100,4 +100,8 @@
 
     <!-- App Lock -->
     <dimen name="applock_icon_dimension">54dp</dimen>
+	
+    <!-- Recognizing fingerprint animation -->
+    <dimen name="fod_animation_size">280dp</dimen>
+
 </resources>
