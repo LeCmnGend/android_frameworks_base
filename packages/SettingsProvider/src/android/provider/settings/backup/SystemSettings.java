@@ -92,5 +92,6 @@ public class SystemSettings {
         Settings.System.ACCENT_COLOR,
         Settings.System.NOTIFICATION_HEADERS,
         Settings.System.FLASHLIGHT_ON_CALL,
+        Settings.System.RINGTONE_VIBRATION_PATTERN,
     };
 }
