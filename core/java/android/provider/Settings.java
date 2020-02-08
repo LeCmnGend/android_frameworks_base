@@ -4966,6 +4966,12 @@ public final class Settings {
         public static final String FOD_RECOGNIZING_ANIMATION = "fod_recognizing_animation";
 
         /**
+         * FOD recognizing animation picker
+         * @hide
+         */
+        public static final String FOD_ANIM = "fod_anim";
+
+        /**
          * Enable statusbar double tap gesture on to put device to sleep
          * @hide
          */
