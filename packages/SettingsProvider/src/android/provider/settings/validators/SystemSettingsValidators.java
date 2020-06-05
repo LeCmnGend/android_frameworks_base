@@ -272,6 +272,25 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.NOTIFICATION_HEADERS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.FLASHLIGHT_ON_CALL, new InclusiveIntegerRangeValidator(0, 3));
         VALIDATORS.put(System.LOCKSCREEN_PIN_SCRAMBLE_LAYOUT, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(System.RINGTONE_VIBRATION_PATTERN, new InclusiveIntegerRangeValidator(0, 4));
+        VALIDATORS.put(System.RINGTONE_VIBRATION_PATTERN, new InclusiveIntegerRangeValidator(0, 5));
+        VALIDATORS.put(System.CUSTOM_RINGTONE_VIBRATION_PATTERN,
+                new Validator() {
+                    @Override
+                    public boolean validate(String value) {
+                        final String[] args = value.split(",", 0);
+                        if (args.length != 3) return false;
+                        try {
+                            for (String str : args) {
+                                final int amp = Integer.parseInt(str);
+                                if (amp < 0 || amp > 1000) {
+                                    return false;
+                                }
+                            }
+                        } catch (NumberFormatException e) {
+                            return false;
+                        }
+                        return true;
+                    }
+                });
     }
 }
