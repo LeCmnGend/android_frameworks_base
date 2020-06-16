@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
+import android.os.SystemProperties;
 import android.view.View;
 
 import com.android.internal.R;
@@ -44,6 +45,7 @@ import javax.inject.Singleton;
 @Singleton
 public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FODCircleViewImpl";
+    private static final String FOD_DISABLED_BY_PROP = "ro.fingerprint.inscreen_disabled";
 
     private FODCircleView mFodCircleView;
 
@@ -66,7 +68,9 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     public void start() {
         PackageManager packageManager = mContext.getPackageManager();
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT) ||
-                !(packageManager.hasSystemFeature(LineageContextConstants.Features.FOD) || FodUtils.hasFodSupport(mContext))) {
+                !(packageManager.hasSystemFeature(LineageContextConstants.Features.FOD) || 
+				FodUtils.hasFodSupport(mContext)) ||
+                SystemProperties.getBoolean(FOD_DISABLED_BY_PROP, false)) {
             return;
         }
         mCommandQueue.addCallback(this);
