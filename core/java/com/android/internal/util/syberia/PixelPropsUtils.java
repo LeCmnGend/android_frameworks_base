@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.util.custom;
+package com.android.internal.util.syberia;
 
 import android.os.Build;
 import android.util.Log;
@@ -31,7 +31,6 @@ public class PixelPropsUtils {
     private static final boolean DEBUG = false;
 
     private static final Map<String, Object> propsToChange;
-    private static final Map<String, Object> propsToChangePixel2;
     private static final Map<String, Object> propsToChangePixel3XL;
     private static final Map<String, Object> propsToChangeOGPixelXL;
 
@@ -57,17 +56,14 @@ public class PixelPropsUtils {
         "com.google.android.as",
         "com.google.android.dialer",
         "com.google.android.ext.services",
+        "com.google.android.gms",
+        "com.google.android.gms.location.history",
         "com.google.android.gsf",
         "com.google.android.inputmethod.latin",
         "com.google.android.soundpicker",
         "com.google.intelligence.sense",
         "com.google.pixel.dynamicwallpapers",
         "com.google.pixel.livewallpaper"
-    };
-
-    private static final String[] packagesToChangePixel2 = {
-            "com.google.android.gms",
-            "com.google.android.gms.location.history"
     };
 
     private static final String[] packagesToChangePixel3XL = {
@@ -83,37 +79,29 @@ public class PixelPropsUtils {
         "com.samsung.android.geargplugin",
         "com.samsung.android.gearnplugin",
         "com.samsung.android.modenplugin",
-        "com.samsung.android.neatplugin",
-        "com.samsung.android.waterplugin"
+        "com.samsung.android.neatplugin"
     };
 
     static {
         propsToChange = new HashMap<>();
         propsToChange.put("BRAND", "google");
         propsToChange.put("MANUFACTURER", "Google");
-        propsToChange.put("DEVICE", "redfin");
-        propsToChange.put("PRODUCT", "redfin");
-        propsToChange.put("MODEL", "Pixel 5");
-        propsToChange.put("FINGERPRINT", "google/redfin/redfin:11/RQ3A.210905.001/7511028:user/release-keys");
+        propsToChange.put("DEVICE", "raven");
+        propsToChange.put("PRODUCT", "raven");
+        propsToChange.put("MODEL", "Pixel 6 Pro");
+        propsToChange.put("FINGERPRINT", "google/raven/raven:12/SQ1D.211205.017/7955197:user/release-keys");
         propsToChange.put("IS_DEBUGGABLE", false);
         propsToChange.put("IS_ENG", false);
         propsToChange.put("IS_USERDEBUG", false);
         propsToChange.put("IS_USER", true);
         propsToChange.put("TYPE", "user");
-        propsToChangePixel2 = new HashMap<>();
-        propsToChangePixel2.put("BRAND", "google");
-        propsToChangePixel2.put("MANUFACTURER", "Google");
-        propsToChangePixel2.put("DEVICE", "walleye");
-        propsToChangePixel2.put("PRODUCT", "walleye");
-        propsToChangePixel2.put("MODEL", "Pixel 2");
-        propsToChangePixel2.put("FINGERPRINT", "google/walleye/walleye:8.1.0/OPM1.171019.011/4448085:user/release-keys");
         propsToChangePixel3XL = new HashMap<>();
         propsToChangePixel3XL.put("BRAND", "google");
         propsToChangePixel3XL.put("MANUFACTURER", "Google");
         propsToChangePixel3XL.put("DEVICE", "crosshatch");
         propsToChangePixel3XL.put("PRODUCT", "crosshatch");
         propsToChangePixel3XL.put("MODEL", "Pixel 3 XL");
-        propsToChangePixel3XL.put("FINGERPRINT", "google/crosshatch/crosshatch:11/RQ3A.210905.001/7511028:user/release-keys");
+        propsToChangePixel3XL.put("FINGERPRINT", "google/crosshatch/crosshatch:12/SP1A.210812.015/7679548:user/release-keys");
         propsToChangePixel3XL.put("IS_DEBUGGABLE", false);
         propsToChangePixel3XL.put("IS_ENG", false);
         propsToChangePixel3XL.put("IS_USERDEBUG", false);
@@ -142,16 +130,6 @@ public class PixelPropsUtils {
                 Log.d(TAG, "Defining props for: " + packageName);
             }
             for (Map.Entry<String, Object> prop : propsToChange.entrySet()) {
-                String key = prop.getKey();
-                Object value = prop.getValue();
-                setPropValue(key, value);
-            }
-        }
-        if (Arrays.asList(packagesToChangePixel2).contains(packageName)){
-            if (DEBUG){
-                Log.d(TAG, "Defining props for: " + packageName);
-            }
-            for (Map.Entry<String, Object> prop : propsToChangePixel2.entrySet()) {
                 String key = prop.getKey();
                 Object value = prop.getValue();
                 setPropValue(key, value);
