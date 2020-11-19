@@ -136,6 +136,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
@@ -271,6 +272,8 @@ import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
+
+import com.android.internal.util.syberia.AttestationHooks;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -2188,7 +2191,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public ActivityManager.StackInfo getFocusedStackInfo() throws RemoteException {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        if (!AttestationHooks.shouldBypassTaskPermission(mContext)) {
+            enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -3581,8 +3586,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
+        if (!AttestationHooks.shouldBypassTaskPermission(mContext)) {
+            enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "registerTaskStackListener()");
+        }
         mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
 

@@ -63,7 +63,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.android.internal.util.custom.PixelPropsUtils;
+import com.android.internal.util.syberia.AttestationHooks;
+import com.android.internal.util.syberia.PixelPropsUtils;
 
 /**
  * Base class for implementing application instrumentation code.  When running
@@ -1160,7 +1161,8 @@ public class Instrumentation {
                 .instantiateApplication(cl, className);
         app.attach(context);
         String packageName = app.getPackageName();
-        PixelPropsUtils.setProps(packageName);
+        AttestationHooks.setProps(context);
+        PixelPropsUtils.setProps(context);
         return app;
     }
     
@@ -1179,7 +1181,8 @@ public class Instrumentation {
         Application app = (Application)clazz.newInstance();
         app.attach(context);
         String packageName = app.getPackageName();
-        PixelPropsUtils.setProps(packageName);
+        AttestationHooks.setProps(context);
+        PixelPropsUtils.setProps(context);
         return app;
     }
 

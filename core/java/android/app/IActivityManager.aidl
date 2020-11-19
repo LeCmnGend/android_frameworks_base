@@ -17,6 +17,7 @@
 package android.app;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
