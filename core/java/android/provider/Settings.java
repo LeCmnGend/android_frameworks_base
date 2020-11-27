@@ -5303,6 +5303,12 @@ public final class Settings {
          */
         public static final String AMBIENT_WAKE_GESTURES = "ambient_wake_gestures";
 
+        /**
+         * FOD icon picker
+         * @hide
+         */
+        public static final String FOD_ICON = "fod_icon";
+
          /**
          * Whether to enable DOZE only when charging
          * @hide
