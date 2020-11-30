@@ -203,6 +203,12 @@ public class FODCircleView extends ImageView implements TunerService.Tunable, Co
             if (mIsKeyguard && !mIsBiometricRunning) {
                 return;
             }
+
+            if (mUpdateMonitor.userNeedsStrongAuth()) {
+                // Keyguard requires strong authentication (not biometrics)
+                return;
+            }
+
             mHandler.post(() -> showCircle());
         }
 
