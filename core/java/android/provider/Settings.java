@@ -5309,6 +5309,12 @@ public final class Settings {
          */
         public static final String FOD_ICON = "fod_icon";
 
+        /**
+         * FOD pressed color
+         * @hide
+         */
+        public static final String FOD_COLOR = "fod_color";
+
          /**
          * Whether to enable DOZE only when charging
          * @hide

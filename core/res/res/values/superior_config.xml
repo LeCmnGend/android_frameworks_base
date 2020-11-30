@@ -141,5 +141,8 @@
     <!-- Whether notify fingerprint client of successful cancelled authentication -->
     <bool name="config_notifyClientOnFingerprintCancelSuccess">false</bool>
 
+    <!-- Default fod pressed color -->
+    <integer name="config_fod_pressed_color">1</integer>
+
 </resources>
 
