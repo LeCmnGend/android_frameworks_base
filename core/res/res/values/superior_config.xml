@@ -64,21 +64,6 @@
      <!-- Soli check -->
      <bool name="config_has_Soli">false</bool>
 
-     <!-- Shows the required view for in-display fingerprint -->
-     <bool name="config_supportsInDisplayFingerprint">false</bool>
-
-     <!-- FOD icon dim-->
-     <bool name="config_targetUsesInKernelDimming">false</bool>
-
-     <!-- NightLight FOD -->
-     <bool name="disable_fod_night_light">false</bool>
-
-     <!-- Hide FOD while Going to sleep from lockscreen to avoid HBM flicker -->
-     <bool name="config_inDisplayFingerprintFlickersGoingToSleep">false</bool>
-
-     <!-- Whether device supports in-display fingerprint when screen is turned off -->
-     <bool name="config_supportScreenOffFod">false</bool>
-
      <!-- Whether device has a physical display cutout -->
      <bool name="config_physicalDisplayCutout">false</bool>
 
@@ -150,7 +135,5 @@
     <!-- Should we filter any display modes which are unmapped? -->
     <bool name="config_filterDisplayModes">false</bool>
 
-    <!-- Whether device has fingerprint on power button -->
-    <bool name="config_powerButtonFingerprint">false</bool>
 </resources>
 

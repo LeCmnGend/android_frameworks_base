@@ -45,7 +45,6 @@ import com.android.systemui.util.wakelock.WakeLock;
 public class AmbientIndicationContainer extends AutoReinflateContainer implements
         NotificationMediaManager.MediaListener {
 
-    private final int mFODmargin;
     private final int mKGmargin;
     private View mAmbientIndication;
     private boolean mDozing;
@@ -85,8 +84,6 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         initializeMedia();
         mTrackInfoSeparator = getResources().getString(R.string.ambientmusic_songinfo);
         mAmbientMusicTicker = getAmbientMusicTickerStyle();
-        mFODmargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.keyguard_security_fod_view_margin);
         mKGmargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_charging_animation_margin);
     }
@@ -166,29 +163,6 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         mKeyguardIndicationController.bindAmbientIndicationContainer(this);
     }
 
-    public void updatePosition() {
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) this.getLayoutParams();
-        if (hasInDisplayFingerprint()) {
-            lp.setMargins(0, 0, 0, mFODmargin);
-        } else if (isChargingIndicationVisible()) {
-            if (!mChargingIndicationChecked) {
-                mChargingIndicationChecked = true;
-                lp.setMargins(0, 0, 0, mKGmargin);
-            }
-        } else {
-            if (mChargingIndicationChecked) {
-                mChargingIndicationChecked = false;
-                lp.setMargins(0, 0, 0, 0);
-            }
-        }
-        this.setLayoutParams(lp);
-    }
-
-    private boolean hasInDisplayFingerprint() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_supportsInDisplayFingerprint);
-    }
-
     private boolean isChargingIndicationVisible() {
         return mKeyguardIndicationController.isChargingIndicationVisible();
     }
@@ -208,9 +182,6 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
             }
             setVisibility(shouldShow(), true);
         }
-        if (shouldShow()) {
-            updatePosition();
-        }
     }
 
     public void updateDozingState(boolean dozing) {
@@ -218,18 +189,12 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
             mDozing = dozing;
             setVisibility(shouldShow(), true);
         }
-        if (shouldShow()) {
-            updatePosition();
-        }
     }
 
     private void setVisibility(boolean shouldShow, boolean skipPosition) {
         if (mVisible != shouldShow) {
             mVisible = shouldShow;
             mAmbientIndication.setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
-        }
-        if (!skipPosition && shouldShow) {
-            updatePosition();
         }
     }
 

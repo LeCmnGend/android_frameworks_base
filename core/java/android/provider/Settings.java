@@ -4640,18 +4640,6 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /**
-         * FOD recognizing animation
-         * @hide
-         */
-        public static final String FOD_RECOGNIZING_ANIMATION = "fod_recognizing_animation";
-
-        /**
-         * FOD recognizing animation picker
-         * @hide
-         */
-        public static final String FOD_ANIM = "fod_recognizing_animation_list";
-
-        /**
          * Show pointer location on screen?
          * 0 = no
          * 1 = yes
@@ -5592,24 +5580,6 @@ public final class Settings {
         public static final String RIGHT_VERTICAL_BACK_SWIPE_APP_ACTIVITY_ACTION = "right_vertical_back_swipe_app_activity_action";
 
         /**
-         * FOD icon picker
-         * @hide
-         */
-        public static final String FOD_ICON = "fod_icon";
-
-        /**
-         * FOD night light
-         * @hide
-         */
-        public static final String FOD_NIGHT_LIGHT = "fod_night_light";
-
-        /**
-         * Screen off fod
-         * @hide
-         */
-        public static final String FOD_GESTURE = "fod_gesture";
-
-        /**
          * Adaptive playback
          * Automatically pause media when the volume is muted and
          * will resume automatically when volume is restored.
@@ -6160,7 +6130,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_ADJUSTMENT);
             PRIVATE_SETTINGS.add(DISPLAY_PICTURE_ADJUSTMENT);
             PRIVATE_SETTINGS.add(LIVE_DISPLAY_HINTED);
-            PRIVATE_SETTINGS.add(FOD_GESTURE);
             PRIVATE_SETTINGS.add(COLOR_BUCKET_OVERLAY);
             PRIVATE_SETTINGS.add(QS_PANEL_BG_USE_NEW_TINT);
             PRIVATE_SETTINGS.add(FOOTER_TEXT_SHOW);
@@ -9708,17 +9677,6 @@ public final class Settings {
          * @hide
          */
         public static final String FACE_UNLOCK_RE_ENROLL = "face_unlock_re_enroll";
-
-        /**
-         * Whether user is required to press power button to unlock with fingerprint.
-         *
-         * This option is only available in side-mounted fingerprint devices where
-         * the fingerprint scanner is embedded in the power button.
-         *
-         * @hide
-         */
-        public static final String FINGERPRINT_POWER_BUTTON_PRESS =
-                "fingerprint_power_button_press";
 
         /**
          * Whether or not debugging is enabled.

@@ -56,21 +56,6 @@
    <!-- Soli check -->
    <java-symbol type="bool" name="config_has_Soli" />
 
-   <!-- In-display Fingerprint -->
-   <java-symbol type="bool" name="config_supportsInDisplayFingerprint" />
-
-   <!-- FOD icon dimming -->
-   <java-symbol type="bool" name="config_targetUsesInKernelDimming" />
-
-   <!-- NightLight FOD -->
-   <java-symbol type="bool" name="disable_fod_night_light"/>
-
-   <!-- Hide FOD while Going to sleep from lockscreen to avoid HBM flicker -->
-   <java-symbol type="bool" name="config_inDisplayFingerprintFlickersGoingToSleep" />
-
-   <!-- Whether device supports in-display fingerprint when screen is turned off -->
-   <java-symbol type="bool" name="config_supportScreenOffFod" />
-
    <!-- Whether device has a physical display cutout -->
    <java-symbol type="bool" name="config_physicalDisplayCutout" />
 
@@ -134,8 +119,5 @@
 
     <!-- App Lock -->
     <java-symbol type="string" name="lockscreen_pattern_instructions" />
-
-     <!-- Power button fingerprint -->
-     <java-symbol type="bool" name="config_powerButtonFingerprint" />
 
 </resources>
