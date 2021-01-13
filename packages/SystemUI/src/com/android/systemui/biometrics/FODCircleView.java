@@ -178,11 +178,21 @@ public class FODCircleView extends ImageView implements TunerService.Tunable {
             updateAlpha();
 
             if (dreaming) {
-                mBurnInProtectionTimer = new Timer();
-                mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
-            } else if (mBurnInProtectionTimer != null) {
-                mBurnInProtectionTimer.cancel();
-                updatePosition();
+                if (shouldShowOnDoze()) {
+                    mBurnInProtectionTimer = new Timer();
+                    mBurnInProtectionTimer.schedule(new BurnInProtectionTask(), 0, 60 * 1000);
+                } else {
+                    setImageDrawable(null);
+                    invalidate();
+                }
+            } else {
+                if (mBurnInProtectionTimer != null) {
+                    mBurnInProtectionTimer.cancel();
+                    updatePosition();
+                }
+                if (!shouldShowOnDoze()) {
+                    invalidate();
+                }
             }
         }
 
@@ -361,7 +371,7 @@ public class FODCircleView extends ImageView implements TunerService.Tunable {
     public void onTuningChanged(String key, String newValue) {
         if (key.equals(FOD_GESTURE)) {
             mFodGestureEnable = TunerService.parseIntegerSwitch(newValue, false);
-        } else {
+        } else if (key.equals(Settings.Secure.DOZE_ENABLED)) {
             mDozeEnabled = TunerService.parseIntegerSwitch(newValue, true);
         }
     }
@@ -550,7 +560,11 @@ public class FODCircleView extends ImageView implements TunerService.Tunable {
             return;
         }
 
-        mFODIcon.show();
+        if (mIsDreaming && !shouldShowOnDoze()) {
+            setImageDrawable(null);
+        } else {
+            mFODIcon.show();
+        }
         updatePosition();
 
         setVisibility(View.VISIBLE);
@@ -675,6 +689,11 @@ public class FODCircleView extends ImageView implements TunerService.Tunable {
         }
 
         return false;
+    }
+
+    private boolean shouldShowOnDoze() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.FOD_ON_DOZE, 1) == 1;
     }
 
     private class BurnInProtectionTask extends TimerTask {

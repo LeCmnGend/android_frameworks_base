@@ -136,4 +136,7 @@
          or FOD Circle hiding after the screen is put to sleep  -->
     <java-symbol type="bool" name="config_hideFodCircleGoingToSleep" />
 
+    <!-- Whether doze feature is enabled by default in settings -->
+    <java-symbol type="bool" name="config_dozeDefaultEnabled" />
+
 </resources>
