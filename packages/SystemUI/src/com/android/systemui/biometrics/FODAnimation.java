@@ -72,12 +72,11 @@ public class FODAnimation extends ImageView {
 
     private final String mFodAnimationPackage;
 
-    public FODAnimation(Context context, int mPositionX, int mPositionY) {
+    public FODAnimation(Context context, WindowManager windowManager, int mPositionX, int mPositionY) {
         super(context);
 
         mContext = context;
-        mWindowManager = mContext.getSystemService(WindowManager.class);
-
+        mWindowManager = windowManager;
         mFodAnimationPackage = mContext.getResources().getString(com.android.internal.R.string.config_fodAnimationPackage);
 
         mAnimationSize = mContext.getResources().getDimensionPixelSize(R.dimen.fod_animation_size);
@@ -137,11 +136,13 @@ public class FODAnimation extends ImageView {
     public void showFODanimation() {
         if (mAnimParams != null && !mShowing && mIsKeyguard) {
             mShowing = true;
-            if (this.getWindowToken() == null){
+            if (getWindowToken() == null){
                 mWindowManager.addView(this, mAnimParams);
                 mWindowManager.updateViewLayout(this, mAnimParams);
             }
-            recognizingAnim.start();
+            if (recognizingAnim != null) {
+                recognizingAnim.start();
+            }
         }
     }
 
@@ -153,7 +154,7 @@ public class FODAnimation extends ImageView {
                 recognizingAnim.stop();
                 recognizingAnim.selectDrawable(0);
             }
-            if (this.getWindowToken() != null) {
+            if (getWindowToken() != null) {
                 mWindowManager.removeView(this);
             }
         }
