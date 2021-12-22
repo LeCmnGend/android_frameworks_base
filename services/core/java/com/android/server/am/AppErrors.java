@@ -926,7 +926,10 @@ class AppErrors {
 
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-            if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
+            final boolean anrSilenced = mAppsNotReportingCrashes != null
+                    && mAppsNotReportingCrashes.contains(proc.info.packageName);
+            if (!anrSilenced &&
+                    (mService.mAtmInternal.canShowErrorDialogs() || showBackground)) {
                 proc.getDialogController().showAnrDialogs(data);
             } else {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
