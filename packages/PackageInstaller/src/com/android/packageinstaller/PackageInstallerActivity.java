@@ -16,6 +16,8 @@
 */
 package com.android.packageinstaller;
 
+import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
+import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -51,6 +53,8 @@ import android.widget.TextView;
 import com.android.internal.app.AlertActivity;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This activity is launched when a new application is installed via side loading
@@ -91,6 +95,12 @@ public class PackageInstallerActivity extends AlertActivity {
     String mCallingPackage;
     ApplicationInfo mSourceInfo;
 
+    /**
+     * A collection of unknown sources listeners that are actively listening for app ops mode
+     * changes
+     */
+    private List<UnknownSourcesListener> mActiveUnknownSourcesListeners = new ArrayList<>(1);
+
     // ApplicationInfo object primarily used for already existing applications
     private ApplicationInfo mAppInfo = null;
 
@@ -117,6 +127,8 @@ public class PackageInstallerActivity extends AlertActivity {
 
     // Would the mOk button be enabled if this activity would be resumed
     private boolean mEnableOk = false;
+    private boolean mPermissionResultWasSet;
+    private boolean mAllowNextOnPause;
 
     private void startInstallConfirm(PackageInfo oldInfo) {
         requireViewById(R.id.updating_app_view).setVisibility(View.VISIBLE); // the main layout
@@ -382,6 +394,24 @@ public class PackageInstallerActivity extends AlertActivity {
             // Don't allow the install button to be clicked as there might be overlays
             mOk.setEnabled(false);
         }
+        // sometimes this activity becomes hidden after onPause(),
+        // and the user is unable to bring it back
+        if (!mPermissionResultWasSet && mSessionId != -1) {
+            if (mAllowNextOnPause) {
+                mAllowNextOnPause = false;
+            } else {
+                if (!isFinishing()) {
+                    finish();
+                }
+            }
+        }
+    }
+
+    // handles startActivity() calls too
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
+        mAllowNextOnPause = true;
+        super.startActivityForResult(intent, requestCode, options);
     }
 
     @Override
@@ -389,6 +419,17 @@ public class PackageInstallerActivity extends AlertActivity {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(ALLOW_UNKNOWN_SOURCES_KEY, mAllowUnknownSources);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        while (!mActiveUnknownSourcesListeners.isEmpty()) {
+            unregister(mActiveUnknownSourcesListeners.get(0));
+        }
+        if (!mPermissionResultWasSet) {
+            mInstaller.setPermissionsResult(mSessionId, false);
+        }
     }
 
     private void bindUi() {
@@ -714,6 +755,40 @@ public class PackageInstallerActivity extends AlertActivity {
                     .setMessage(getString(R.string.install_failed_msg, argument))
                     .create();
         }
+    }
+
+    private class UnknownSourcesListener implements AppOpsManager.OnOpChangedListener {
+
+        @Override
+        public void onOpChanged(String op, String packageName) {
+            if (!mOriginatingPackage.equals(packageName)) {
+                return;
+            }
+            unregister(this);
+            mActiveUnknownSourcesListeners.remove(this);
+            if (isDestroyed()) {
+                return;
+            }
+            getMainThreadHandler().postDelayed(() -> {
+                if (!isDestroyed()) {
+                    startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
+                }
+            }, 500);
+
+        }
+
+    }
+
+    private void register(UnknownSourcesListener listener) {
+        mAppOpsManager.startWatchingMode(
+                AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES, mOriginatingPackage,
+                listener);
+        mActiveUnknownSourcesListeners.add(listener);
+    }
+
+    private void unregister(UnknownSourcesListener listener) {
+        mAppOpsManager.stopWatchingMode(listener);
+        mActiveUnknownSourcesListeners.remove(listener);
     }
 
     /**
