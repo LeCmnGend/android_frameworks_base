@@ -63,6 +63,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the
@@ -702,7 +703,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             for (int i = mControllerCallbackHolders.size() - 1; i >= 0; i--) {
                 ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
+                    holder.mCallback.asBinder().unlinkToDeath(holder.mDeathMonitor, 0);
                     holder.mCallback.onSessionDestroyed();
+                } catch (NoSuchElementException e) {
+                    logCallbackException("error unlinking to binder death", holder, e);
                 } catch (DeadObjectException e) {
                     mControllerCallbackHolders.remove(i);
                     logCallbackException("Removing dead callback in pushSessionDestroyed",
@@ -1286,11 +1290,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     return;
                 }
                 if (getControllerHolderIndexForCb(cb) < 0) {
-                    mControllerCallbackHolders.add(new ISessionControllerCallbackHolder(cb,
-                            packageName, Binder.getCallingUid()));
+                    ISessionControllerCallbackHolder holder = new ISessionControllerCallbackHolder(
+                        cb, packageName, Binder.getCallingUid(), () -> unregisterCallback(cb));
+                    mControllerCallbackHolders.add(holder);
                     if (DEBUG) {
                         Log.d(TAG, "registering controller callback " + cb + " from controller"
                                 + packageName);
+                    }
+                    // Avoid callback leaks
+                    try {
+                        // cb is not referenced outside of the MediaSessionRecord, so the death
+                        // handler won't prevent MediaSessionRecord to be garbage collected.
+                        cb.asBinder().linkToDeath(holder.mDeathMonitor, 0);
+                    } catch (RemoteException e) {
+                        unregisterCallback(cb);
+                        Log.w(TAG, "registerCallback failed to linkToDeath", e);
                     }
                 }
             }
@@ -1301,6 +1315,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             synchronized (mLock) {
                 int index = getControllerHolderIndexForCb(cb);
                 if (index != -1) {
+                    try {
+                        cb.asBinder().unlinkToDeath(
+                          mControllerCallbackHolders.get(index).mDeathMonitor, 0);
+                    } catch (NoSuchElementException e) {
+                        Log.w(TAG, "error unlinking to binder death", e);
+                    }
                     mControllerCallbackHolders.remove(index);
                 }
                 if (DEBUG) {
@@ -1511,12 +1531,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         private final ISessionControllerCallback mCallback;
         private final String mPackageName;
         private final int mUid;
+        private final IBinder.DeathRecipient mDeathMonitor;
 
         ISessionControllerCallbackHolder(ISessionControllerCallback callback, String packageName,
-                int uid) {
+                int uid, IBinder.DeathRecipient deathMonitor) {
             mCallback = callback;
             mPackageName = packageName;
             mUid = uid;
+            mDeathMonitor = deathMonitor;
         }
     }
 
