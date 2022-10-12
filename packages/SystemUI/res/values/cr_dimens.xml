@@ -146,4 +146,5 @@
     <dimen name="vertical_max_swift">1.0dp</dimen>
 
     <dimen name="fps_info_text_padding">4dp</dimen>
+
 </resources>
