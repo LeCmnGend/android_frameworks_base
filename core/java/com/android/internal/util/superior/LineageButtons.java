@@ -33,7 +33,7 @@ import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
-import com.android.internal.util.superior.Utils;
+import com.android.internal.util.superior.SuperiorUtils;
 
 import java.util.List;
 
@@ -217,43 +217,43 @@ public final class LineageButtons {
             default:
                 break;
             case 1: // Assistant
-                Utils.startAssist();
+                SuperiorUtils.startAssist();
                 break;
             case 2: // Voice search
-                Utils.launchVoiceSearch(context);
+                SuperiorUtils.launchVoiceSearch(context);
                 break;
             case 3: // Camera
-                Utils.launchCamera(context);
+                SuperiorUtils.launchCamera(context);
                 break;
             case 4: // Flashlight
-                Utils.toggleCameraFlash();
+                SuperiorUtils.toggleCameraFlash();
                 break;
             case 5: // Application
-                Utils.launchApp(context, leftEdge, isVerticalSwipe);
+                SuperiorUtils.launchApp(context, leftEdge, isVerticalSwipe);
                 break;
             case 6: // Volume panel
-                Utils.toggleVolumePanel(context);
+                SuperiorUtils.toggleVolumePanel(context);
                 break;
             case 7: // Screen off
-                Utils.switchScreenOff(context);
+                SuperiorUtils.switchScreenOff(context);
                 break;
             case 8: // Screenshot
-                Utils.takeScreenshot(true);
+                SuperiorUtils.takeScreenshot(true);
                 break;
             case 9: // Notification panel
-                Utils.toggleNotifications();
+                SuperiorUtils.toggleNotifications();
                 break;
             case 10: // QS panel
-                Utils.toggleQsPanel();
+                SuperiorUtils.toggleQsPanel();
                 break;
             case 11: // Clear notifications
-                Utils.clearAllNotifications();
+                SuperiorUtils.clearAllNotifications();
                 break;
             case 12: // Ringer modes
-                Utils.toggleRingerModes(context);
+                SuperiorUtils.toggleRingerModes(context);
                 break;
             case 13: // Kill app
-                Utils.killForegroundApp();
+                SuperiorUtils.killForegroundApp();
                 break;
             case 14: // Skip song
                 skipTrack();
@@ -262,13 +262,13 @@ public final class LineageButtons {
                 previousTrack();
                 break;
             case 16: // Power menu
-                Utils.showPowerMenu();
+                SuperiorUtils.showPowerMenu();
                 break;
             case 17: // Partial screenshot
-                Utils.takeScreenshot(false);
+                SuperiorUtils.takeScreenshot(false);
                 break;
             case 18: // Hush mute
-                Utils.triggerHushMute(context);
+                SuperiorUtils.triggerHushMute(context);
                 break;
         }
     }

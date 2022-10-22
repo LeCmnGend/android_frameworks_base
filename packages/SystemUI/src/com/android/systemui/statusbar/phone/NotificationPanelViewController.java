@@ -72,7 +72,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.superior.Utils;
+import com.android.internal.util.superior.SuperiorUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardStatusView;
@@ -596,7 +596,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mDoubleTapGesture = new GestureDetector(mView.getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                Utils.switchScreenOff(mView.getContext());
+                SuperiorUtils.switchScreenOff(mView.getContext());
                 // quick pulldown can trigger those values
                 // on double tap - so reset them
                 mQsExpandImmediate = false;
@@ -608,7 +608,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mLockscreenDoubleTapToSleep = new GestureDetector(mView.getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                Utils.switchScreenOff(mView.getContext());
+                SuperiorUtils.switchScreenOff(mView.getContext());
                 return true;
             }
         });

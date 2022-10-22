@@ -148,7 +148,7 @@ import com.android.internal.util.hwkeys.ActionUtils;
 import com.android.internal.util.hwkeys.PackageMonitor;
 import com.android.internal.util.hwkeys.PackageMonitor.PackageChangedListener;
 import com.android.internal.util.hwkeys.PackageMonitor.PackageState;
-import com.android.internal.util.superior.Utils;
+import com.android.internal.util.superior.SuperiorUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -4795,7 +4795,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateNavigationBar(boolean init) {
-        boolean showNavBar = Utils.deviceSupportNavigationBar(mContext);
+        boolean showNavBar = SuperiorUtils.deviceSupportNavigationBar(mContext);
         if (init) {
             if (showNavBar) {
                 mNavigationBarController.createNavigationBars(true, null);
