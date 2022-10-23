@@ -3903,6 +3903,12 @@ public final class Settings {
                 "lockscreen_quick_unlock_control";
 
         /**
+         * Screen off fod
+         * @hide
+         */
+        public static final String FOD_GESTURE = "fod_gesture";
+
+        /**
          * A formatted string of the next alarm that is set, or the empty string
          * if there is no alarm set.
          *
