@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.util.superior.fod.FodUtils;
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -45,6 +46,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 public class AmbientIndicationContainer extends AutoReinflateContainer implements
         NotificationMediaManager.MediaListener {
 
+    private final int mFODmargin;
     private final int mKGmargin;
     private View mAmbientIndication;
     private boolean mDozing;
@@ -84,6 +86,10 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         initializeMedia();
         mTrackInfoSeparator = getResources().getString(R.string.ambientmusic_songinfo);
         mAmbientMusicTicker = getAmbientMusicTickerStyle();
+ 
+        mFODmargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.keyguard_security_fod_view_margin);
+
         mKGmargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_charging_animation_margin);
     }
@@ -171,6 +177,19 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         return mText;
     }
 
+    private void updatePosition() {
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) this.getLayoutParams();
+        if (hasActiveInDisplayFp()) {
+            lp.setMargins(0, 0, 0, mFODmargin);
+        }
+        this.setLayoutParams(lp);
+    }
+
+    private boolean hasActiveInDisplayFp() {
+        boolean hasInDisplayFingerprint = FodUtils.hasFodSupport(mContext);
+        return hasInDisplayFingerprint;
+    }
+
     public void updateKeyguardState(boolean keyguard) {
         if (keyguard != mKeyguard) {
             mKeyguard = keyguard;
@@ -187,7 +206,10 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
     public void updateDozingState(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;
-            setVisibility(shouldShow(), true);
+        }
+        mAmbientIndication.setVisibility(shouldShow() ? View.VISIBLE : View.INVISIBLE);
+        if (hasActiveInDisplayFp() && shouldShow()) {
+            updatePosition();
         }
     }
 
@@ -255,7 +277,10 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         }
         if (mInfoToSet != null) {
             mText.setText(mInfoToSet);
-            setVisibility(shouldShow(), false);
+            mAmbientIndication.setVisibility(shouldShow() ? View.VISIBLE : View.INVISIBLE);
+            if (hasActiveInDisplayFp() && shouldShow()) {
+                updatePosition();
+            }
         } else {
             hideIndication();
         }
