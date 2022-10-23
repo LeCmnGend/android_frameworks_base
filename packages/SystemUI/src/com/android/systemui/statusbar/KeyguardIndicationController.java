@@ -625,8 +625,40 @@ public class KeyguardIndicationController implements StateListener,
     }
 
     private void updateChargingIndication() {
-        if (mChargingIndication > 0 && !mPowerCharged && mBatteryPresent && mPowerPluggedIn) {
+        if (mChargingIndicationView == null) return;
+        if (mChargingIndication > 0 && mPowerPluggedIn) {
             mChargingIndicationView.setVisibility(View.VISIBLE);
+            if (hasActiveInDisplayFp()) {
+                if (mFODPositionY != 0) {
+                    // Get screen height
+                    WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+                    Display defaultDisplay = windowManager.getDefaultDisplay();
+                    Point size = new Point();
+                    defaultDisplay.getRealSize(size);
+                    int screenHeight = size.y;
+                    // Correct FOD position if cutout is hidden
+                    int statusbarHeight = mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.status_bar_height_portrait);
+                    boolean cutoutMasked = mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_maskMainBuiltInDisplayCutout);
+                    int fodPositionY = mFODPositionY;
+                    if (cutoutMasked) {
+                        fodPositionY = mFODPositionY - statusbarHeight;
+                    }
+                    // Get indication text height
+                    int textViewHeight = mTextView.getMeasuredHeight();
+                    // Get bottom margin height
+                    int marginBottom = mContext.getResources().getDimensionPixelSize(
+                            R.dimen.keyguard_indication_margin_bottom_fingerprint_in_display);
+                    // Calculate charging indication margin
+                    int animationMargin = (screenHeight - fodPositionY) - (textViewHeight + marginBottom) + 10;
+                    // Set position of charging indication
+                    ViewGroup.MarginLayoutParams params =
+                            (ViewGroup.MarginLayoutParams) mChargingIndicationView.getLayoutParams();
+                    params.setMargins(0, 0, 0, animationMargin);
+                    mChargingIndicationView.setLayoutParams(params);
+                }
+            }
             mChargingIndicationView.playAnimation();
         } else {
             mChargingIndicationView.setVisibility(View.GONE);
