@@ -71,9 +71,9 @@ public class FODAnimation extends ImageView {
         "fod_rog_supernova_recognizing_anim",
     };
 
-    private final String FOD_ANIMATIONS_PACKAGE = "com.superior.fod.animations";
+    private final String mFodAnimationPackage;
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "FODAnimations";
 
     public FODAnimation(Context context, int mPositionX, int mPositionY) {
@@ -81,6 +81,8 @@ public class FODAnimation extends ImageView {
 
         mContext = context;
         mWindowManager = mContext.getSystemService(WindowManager.class);
+
+        mFodAnimationPackage = mContext.getResources().getString(com.android.internal.R.string.config_fodAnimationPackage);
 
         mAnimationSize = mContext.getResources().getDimensionPixelSize(R.dimen.fod_animation_size);
         mAnimationOffset = mContext.getResources().getDimensionPixelSize(R.dimen.fod_animation_offset);
@@ -107,8 +109,8 @@ public class FODAnimation extends ImageView {
         int resId = 0;
         try {
             PackageManager pm = mContext.getPackageManager();
-            Resources mApkResources = pm.getResourcesForApplication(FOD_ANIMATIONS_PACKAGE);
-            resId = mApkResources.getIdentifier(drawableName, "drawable", FOD_ANIMATIONS_PACKAGE);
+            Resources mApkResources = pm.getResourcesForApplication(mFodAnimationPackage);
+            resId = mApkResources.getIdentifier(drawableName, "drawable", mFodAnimationPackage);
             if (DEBUG) Log.i(LOG_TAG, "Got resource id: "+ resId +" from package" );
             setBackgroundDrawable(mApkResources.getDrawable(resId));
             recognizingAnim = (AnimationDrawable) getBackground();
