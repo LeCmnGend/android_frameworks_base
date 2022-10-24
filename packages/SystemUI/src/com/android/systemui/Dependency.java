@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.superior.SuperiorSettingsService;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -332,6 +333,7 @@ public class Dependency {
     @Inject Lazy<TaskHelper> mTaskHelper;
     @Inject Lazy<PulseController> mPulseController;
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
+    @Inject Lazy<SuperiorSettingsService> mSuperiorSettingsService;
 
     @Inject
     public Dependency() {
@@ -533,6 +535,8 @@ public class Dependency {
         mProviders.put(PulseController.class, mPulseController::get);
 
         mProviders.put(MediaOutputDialogFactory.class, mMediaOutputDialogFactory::get);
+
+        mProviders.put(SuperiorSettingsService.class, mSuperiorSettingsService::get);
 
         sDependency = this;
     }
