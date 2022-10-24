@@ -292,5 +292,6 @@ public class SystemSettingsValidators {
                     }
                 });
         VALIDATORS.put(System.FOD_GESTURE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.FP_WAKE_UNLOCK, BOOLEAN_VALIDATOR);
     }
 }

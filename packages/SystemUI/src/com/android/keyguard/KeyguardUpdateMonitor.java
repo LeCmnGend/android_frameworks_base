@@ -91,9 +91,11 @@ import com.android.internal.util.superior.fod.FodUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.Dependency;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.superior.SuperiorSettingsService;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -135,7 +137,8 @@ import com.android.internal.util.custom.faceunlock.FaceUnlockUtils;
  * to be updated.
  */
 @Singleton
-public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable {
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable,
+        SuperiorSettingsService.SuperiorSettingsObserver {
 
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -291,7 +294,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     SettingsObserver mSettingsObserver;
 
-    private final boolean mFingerprintWakeAndUnlock;
+    private boolean mFingerprintWakeAndUnlock;
     private final boolean mFaceAuthOnlyOnSecurityView;
     private static final int FACE_UNLOCK_BEHAVIOR_DEFAULT = 0;
     private static final int FACE_UNLOCK_BEHAVIOR_SWIPE = 1;
@@ -1602,6 +1605,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 com.android.systemui.R.bool.config_fingerprintWakeAndUnlock);
         mFaceAuthOnlyOnSecurityView = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_faceAuthOnlyOnSecurityView);
+
         mBackgroundExecutor = backgroundExecutor;
         mBroadcastDispatcher = broadcastDispatcher;
         mRingerModeTracker = ringerModeTracker;
@@ -1852,6 +1856,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mHasFod = FodUtils.hasFodSupport(mContext);
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
+
+        Dependency.get(SuperiorSettingsService.class).addIntObserver(this, Settings.System.FP_WAKE_UNLOCK);
+    }
+
+    @Override
+    public void onIntSettingChanged(String key, Integer newValue) {
+        mFingerprintWakeAndUnlock = (newValue == 0);
     }
 
     private final UserSwitchObserver mUserSwitchObserver = new UserSwitchObserver() {
