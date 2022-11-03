@@ -65,7 +65,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.superior.fod.FodUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
@@ -80,6 +79,7 @@ import com.android.server.biometrics.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import vendor.lineage.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreen;
 
@@ -722,6 +722,7 @@ public class FingerprintService extends BiometricServiceBase {
                         authenticated = true;
                     }
                 }
+
                 final Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
                 FingerprintService.super.handleAuthenticated(authenticated, fp, token);
                 if (mHasFod && fp.getBiometricId() != 0) {
@@ -890,9 +891,8 @@ public class FingerprintService extends BiometricServiceBase {
         mAlarmManager = context.getSystemService(AlarmManager.class);
         context.registerReceiver(mLockoutReceiver, new IntentFilter(getLockoutResetIntent()),
                 getLockoutBroadcastPermission(), null /* handler */);
+        mHasFod = context.getResources().getBoolean(com.android.internal.R.bool.config_needCustomFODView);
         mLockPatternUtils = new LockPatternUtils(context);
-
-        mHasFod = FodUtils.hasFodSupport(context);
     }
 
     @Override
@@ -977,6 +977,7 @@ public class FingerprintService extends BiometricServiceBase {
 
                     daemon.setActiveGroup(userId, fpDir.getAbsolutePath());
                     mCurrentUserId = userId;
+                    mIsKeyguard = isKeyguard(clientPackage);
                 }
                 mAuthenticatorIds.put(userId,
                         hasEnrolledBiometrics(userId) ? daemon.getAuthenticatorId() : 0L);

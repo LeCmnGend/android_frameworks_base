@@ -18,60 +18,42 @@ package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Slog;
+import android.os.SystemProperties;
 import android.view.View;
 
-import com.android.internal.util.superior.fod.FodUtils;
-
 import com.android.systemui.SystemUI;
-import com.android.systemui.biometrics.FODCircleViewImplCallback;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.util.Assert;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FODCircleViewImpl";
+    private static final String FOD_DISABLED_BY_PROP = "ro.fingerprint.inscreen_disabled";
 
     private FODCircleView mFodCircleView;
-
-    private final ArrayList<WeakReference<FODCircleViewImplCallback>>
-            mCallbacks = new ArrayList<>();
     private final CommandQueue mCommandQueue;
-    private final Runnable mHideFodViewRunnable = () -> mFodCircleView.hide();
-    private final Handler mHandler;
-
-    private boolean mIsFODVisible;
 
     @Inject
     public FODCircleViewImpl(Context context, CommandQueue commandQueue) {
         super(context);
         mCommandQueue = commandQueue;
-        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
     public void start() {
         PackageManager packageManager = mContext.getPackageManager();
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT) ||
-                !FodUtils.hasFodSupport(mContext)) {
+                SystemProperties.getBoolean(FOD_DISABLED_BY_PROP, false)) {
             return;
         }
         mCommandQueue.addCallback(this);
         try {
             mFodCircleView = new FODCircleView(mContext);
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                FODCircleViewImplCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onFODStart();
-                }
-            }
         } catch (RuntimeException e) {
             Slog.e(TAG, "Failed to initialize FODCircleView", e);
         }
@@ -80,14 +62,6 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     @Override
     public void showInDisplayFingerprintView() {
         if (mFodCircleView != null) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                FODCircleViewImplCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onFODStatusChange(true);
-                }
-            }
-            mIsFODVisible = true;
-            mHandler.removeCallbacks(mHideFodViewRunnable);
             mFodCircleView.show();
         }
     }
@@ -95,45 +69,11 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
     @Override
     public void hideInDisplayFingerprintView() {
         if (mFodCircleView != null) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                FODCircleViewImplCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onFODStatusChange(false);
-                }
-            }
-            mIsFODVisible = false;
-            mHandler.postDelayed(mHideFodViewRunnable, 500);
             mFodCircleView.hide();
         }
     }
 
     public int getHeight(boolean includeDecor) {
          return mFodCircleView.getHeight(includeDecor);
-    }
-
-    public void registerCallback(FODCircleViewImplCallback callback) {
-        Assert.isMainThread();
-        Slog.v(TAG, "*** register callback for " + callback);
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            if (mCallbacks.get(i).get() == callback) {
-                Slog.e(TAG, "Object tried to add another callback",
-                        new Exception("Called by"));
-                return;
-            }
-        }
-        mCallbacks.add(new WeakReference<>(callback));
-        removeCallback(null);
-        sendUpdates(callback);
-    }
-
-    public void removeCallback(FODCircleViewImplCallback callback) {
-        Assert.isMainThread();
-        Slog.v(TAG, "*** unregister callback for " + callback);
-        mCallbacks.removeIf(el -> el.get() == callback);
-    }
-
-    private void sendUpdates(FODCircleViewImplCallback callback) {
-        callback.onFODStart();
-        callback.onFODStatusChange(mIsFODVisible);
     }
 }

@@ -16,8 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-
 import static android.view.Gravity.CENTER;
 
 import android.animation.Animator;
@@ -36,8 +34,6 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -111,7 +107,6 @@ public abstract class AuthBiometricView extends LinearLayout {
         int ACTION_BUTTON_TRY_AGAIN = 4;
         int ACTION_ERROR = 5;
         int ACTION_USE_DEVICE_CREDENTIAL = 6;
-        int ACTION_USE_FACE = 7;
 
         /**
          * When an action has occurred. The caller will only invoke this when the callback should
@@ -135,10 +130,6 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         public Button getTryAgainButton() {
             return mBiometricView.findViewById(R.id.button_try_again);
-        }
-
-        public Button getUseFaceButton() {
-            return mBiometricView.findViewById(R.id.button_use_face);
         }
 
         public TextView getTitleView() {
@@ -192,7 +183,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     @VisibleForTesting Button mNegativeButton;
     @VisibleForTesting Button mPositiveButton;
     @VisibleForTesting Button mTryAgainButton;
-    Button mUseFaceButton;
 
     // Measurements when biometric view is showing text, buttons, etc.
     private int mMediumHeight;
@@ -206,9 +196,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     protected boolean mDialogSizeAnimating;
     protected Bundle mSavedState;
 
-    protected boolean mHasFod;
-
     protected final PackageManager mPackageManager;
+    protected boolean mHasFod;
 
     /**
      * Delay after authentication is confirmed, before the dialog should be animated away.
@@ -231,6 +220,12 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @return true if the dialog supports {@link AuthDialog.DialogSize#SIZE_SMALL}
      */
     protected abstract boolean supportsSmallDialog();
+
+    /**
+     * @return string resource which is appended to the negative text
+     */
+    @StringRes
+    protected abstract int getDescriptionTextId();
 
     private final Runnable mResetErrorRunnable;
 
@@ -622,7 +617,6 @@ public abstract class AuthBiometricView extends LinearLayout {
         mNegativeButton = mInjector.getNegativeButton();
         mPositiveButton = mInjector.getPositiveButton();
         mTryAgainButton = mInjector.getTryAgainButton();
-        mUseFaceButton = mInjector.getUseFaceButton();
 
         mAppIcon = new ImageView(mContext);
         final int iconDim = getResources().getDimensionPixelSize(
@@ -656,45 +650,6 @@ public abstract class AuthBiometricView extends LinearLayout {
             mTryAgainButton.setVisibility(View.GONE);
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
-
-        if (this instanceof AuthBiometricFingerprintView) {
-            if (mHasFod) {
-                boolean isGesturalNav = Integer.parseInt(Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(), Settings.Secure.NAVIGATION_MODE,
-                        UserHandle.USER_CURRENT)) == NAV_BAR_MODE_GESTURAL;
-                final int navbarHeight = getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
-                final int fodMargin = getResources().getDimensionPixelSize(
-                        R.dimen.biometric_dialog_fod_margin);
-
-                mIconView.setVisibility(View.INVISIBLE);
-                // The view is invisible, so it still takes space and
-                // we use that to adjust for the FOD
-
-                mIconView.setPadding(0, 0, 0, isGesturalNav ? fodMargin : (fodMargin > navbarHeight)
-                    ? (fodMargin - navbarHeight) : 0);
-
-                // Add IndicatorView above the biometric icon
-                this.removeView(mIndicatorView);
-                this.addView(mIndicatorView, this.indexOfChild(mIconView));
-            } else {
-                mIconView.setVisibility(View.VISIBLE);
-            }
-        } else if (this instanceof AuthBiometricFaceView) {
-            mIconView.setVisibility(View.VISIBLE);
-        }
-
-        mUseFaceButton.setOnClickListener((view) -> {
-            mCallback.onAction(Callback.ACTION_USE_FACE);
-        });
-
-        if (this instanceof AuthBiometricFingerprintView) {
-            if (!Utils.canAuthenticateWithFace(mContext, mUserId)){
-                mUseFaceButton.setVisibility(View.GONE);
-            }
-        } else if (this instanceof AuthBiometricFaceView) {
-            mUseFaceButton.setVisibility(View.GONE);
-        }
     }
 
     /**
@@ -752,26 +707,25 @@ public abstract class AuthBiometricView extends LinearLayout {
             setTextOrHide(mDescriptionView,
                     mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
         } else {
-            Drawable icon = null;
+            ApplicationInfo aInfo = null;
             try {
-                icon = mPackageManager.getApplicationIcon(
-                    mPackageManager.getApplicationInfoAsUser(applockPackage.toString(), 0, mUserId));
+                aInfo = mPackageManager.getApplicationInfoAsUser(applockPackage.toString(), 0, mUserId);
             } catch(PackageManager.NameNotFoundException e) {
                 // ignored
             }
-            if (icon == null){
-                try {
-                    icon = mPackageManager.getApplicationIcon(
-                        mPackageManager.getApplicationInfoAsUser("android", 0, mUserId));
-                } catch(PackageManager.NameNotFoundException e) {
-                    // ignored
-                }
+            Drawable icon = (aInfo == null) ? null : mPackageManager.getApplicationIcon(aInfo);
+            if (icon == null) {
+                mTitleView.setVisibility(View.VISIBLE);
+                setText(mTitleView, getResources().getString(R.string.applock_unlock) + " "
+                        + mBiometricPromptBundle.getString(BiometricPrompt.KEY_TITLE));
+            } else {
+                mTitleView.setVisibility(View.GONE);
+                mAppIcon.setVisibility(View.VISIBLE);
+                mAppIcon.setImageDrawable(icon);
             }
-            mTitleView.setVisibility(View.GONE);
-            mAppIcon.setVisibility(View.VISIBLE);
-            mAppIcon.setImageDrawable(icon);
             setTextOrHide(mDescriptionView, mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION)
-                    + "\n" + getResources().getString(R.string.applock_unlock));
+                    + getResources().getString(R.string.applock_locked) + "\n"
+                    + negativeText + getResources().getString(getDescriptionTextId()));
             mDescriptionView.setGravity(CENTER);
         }
 

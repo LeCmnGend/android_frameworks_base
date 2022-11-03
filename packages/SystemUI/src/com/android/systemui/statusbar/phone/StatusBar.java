@@ -173,7 +173,6 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.ambientmusic.AmbientIndicationContainer;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.FODCircleViewImpl;
-import com.android.systemui.biometrics.FODCircleViewImplCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
@@ -654,27 +653,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mIsDreaming;
     private FODCircleViewImpl mFODCircleViewImpl;
     private String mTopPkgClass;
-    private FODCircleViewImplCallback mFODCircleViewImplCallback =
-            new FODCircleViewImplCallback() {
-                @Override
-                public void onFODStatusChange(boolean isVisible) {
-                    boolean isFPClientActive = false;
-                    try {
-                        isFPClientActive = mFingerprintService.isClientActive();
-                    } catch (Exception e) {
-                        // do nothing.
-                    }
-                    mFodVisibility = isVisible;
-                    if (!isFPClientActive) {
-                        // if the client is not active, we have to nullify mTopPkgClass before
-                        // checking it against current foreground activity
-                        mTopPkgClass = null;
-                        return;
-                    } else if (isVisible && !mIsKeyguard && !mIsDreaming) {
-                        mTopPkgClass = getForegroundPackageNameAndClass();
-                    }
-                }
-            };
 
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private final UserSwitcherController mUserSwitcherController;
@@ -1204,7 +1182,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCustomSettingsObserver.update();
 
         mActivityManager = mContext.getSystemService(ActivityManager.class);
-        mFODCircleViewImpl.registerCallback(mFODCircleViewImplCallback);
     }
 
     // ================================================================================

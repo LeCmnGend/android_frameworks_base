@@ -26,6 +26,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.util.Log;
 
 import com.android.systemui.R;
 
@@ -40,6 +41,7 @@ public class FODAnimation extends ImageView {
     private AnimationDrawable recognizingAnim;
     private WindowManager mWindowManager;
     private boolean mIsKeyguard;
+    private boolean mIsRecognizingAnimEnabled;
 
     private int mSelectedAnim;
     private String[] ANIMATION_STYLES_NAMES = {
@@ -67,21 +69,19 @@ public class FODAnimation extends ImageView {
         "fod_rog_fusion_recognizing_anim",
         "fod_rog_pulsar_recognizing_anim",
         "fod_rog_supernova_recognizing_anim",
-        "fod_oppo_shine_recognizing_anim",
-        "fod_realme_quantum_recognizing_anim",
-        "fod_realme_smoke_recognizing_anim",
-        "fod_realme_strings_recognizing_anim",
     };
 
     private final String mFodAnimationPackage;
 
-    public FODAnimation(Context context, WindowManager windowManager, int mPositionX, int mPositionY) {
+    private static final boolean DEBUG = true;
+    private static final String LOG_TAG = "FODAnimations";
+
+    public FODAnimation(Context context, int mPositionX, int mPositionY) {
         super(context);
 
         mContext = context;
-        mWindowManager = windowManager;
+        mWindowManager = mContext.getSystemService(WindowManager.class);
         mFodAnimationPackage = mContext.getResources().getString(com.android.internal.R.string.config_fodAnimationPackage);
-
         mAnimationSize = mContext.getResources().getDimensionPixelSize(R.dimen.fod_animation_size);
         mAnimationOffset = mContext.getResources().getDimensionPixelSize(R.dimen.fod_animation_offset);
         mAnimParams.height = mAnimationSize;
@@ -95,14 +95,21 @@ public class FODAnimation extends ImageView {
         mAnimParams.y = mPositionY - (mAnimationSize / 2) + mAnimationOffset;
 
         setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        mIsRecognizingAnimEnabled = Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.FOD_RECOGNIZING_ANIMATION, 0) != 0;
+
+        update(mIsRecognizingAnimEnabled);
     }
 
     private void updateAnimationStyle(String drawableName) {
+        if (DEBUG) Log.i(LOG_TAG, "Updating animation style to:" + drawableName);
         int resId = 0;
         try {
             PackageManager pm = mContext.getPackageManager();
             Resources mApkResources = pm.getResourcesForApplication(mFodAnimationPackage);
             resId = mApkResources.getIdentifier(drawableName, "drawable", mFodAnimationPackage);
+            if (DEBUG) Log.i(LOG_TAG, "Got resource id: "+ resId +" from package" );
             setBackgroundDrawable(mApkResources.getDrawable(resId));
             recognizingAnim = (AnimationDrawable) getBackground();
         }
@@ -111,13 +118,16 @@ public class FODAnimation extends ImageView {
         }
     }
 
-    public void update(boolean isEnabled, int selectedAnim) {
+    public void update(boolean isEnabled) {
+        mSelectedAnim = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.FOD_ANIM, 0);
+
         if (isEnabled)
             setAlpha(1.0f);
         else
             setAlpha(0.0f);
 
-        updateAnimationStyle(ANIMATION_STYLES_NAMES[selectedAnim]);
+        updateAnimationStyle(ANIMATION_STYLES_NAMES[mSelectedAnim]);
     }
 
     public void updateParams(int mDreamingOffsetY) {
@@ -131,14 +141,11 @@ public class FODAnimation extends ImageView {
     public void showFODanimation() {
         if (mAnimParams != null && !mShowing && mIsKeyguard) {
             mShowing = true;
-            if (getWindowToken() == null) {
+            if (this.getWindowToken() == null){
                 mWindowManager.addView(this, mAnimParams);
-            } else {
                 mWindowManager.updateViewLayout(this, mAnimParams);
             }
-            if (recognizingAnim != null) {
-                recognizingAnim.start();
-            }
+            recognizingAnim.start();
         }
     }
 
@@ -150,7 +157,7 @@ public class FODAnimation extends ImageView {
                 recognizingAnim.stop();
                 recognizingAnim.selectDrawable(0);
             }
-            if (getWindowToken() != null) {
+            if (this.getWindowToken() != null) {
                 mWindowManager.removeView(this);
             }
         }

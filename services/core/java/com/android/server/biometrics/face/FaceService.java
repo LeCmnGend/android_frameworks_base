@@ -28,8 +28,14 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -47,6 +53,7 @@ import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -56,6 +63,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -380,7 +388,7 @@ public class FaceService extends BiometricServiceBase {
         public void enroll(int userId, final IBinder token, final byte[] cryptoToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
-            checkPermission(MANAGE_BIOMETRIC, opPackageName);
+            checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(userId, opPackageName);
 
             mHandler.post(() -> {
@@ -420,7 +428,7 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public void cancelEnrollment(final IBinder token) {
-            checkPermission(MANAGE_BIOMETRIC, mCustomFaceService.getServicePackageName());
+            checkPermission(MANAGE_BIOMETRIC);
             cancelEnrollmentInternal(token);
         }
 
@@ -559,7 +567,6 @@ public class FaceService extends BiometricServiceBase {
                     UserHandle.getCallingUserId())) {
                 return false;
             }
-
             if (mCustomFaceService.isSupported()) {
                 return mCustomFaceService.isDetected();
             }
@@ -590,7 +597,7 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public List<Face> getEnrolledFaces(int userId, String opPackageName) {
-            checkPermission(MANAGE_BIOMETRIC, opPackageName);
+            checkPermission(MANAGE_BIOMETRIC);
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
@@ -602,7 +609,7 @@ public class FaceService extends BiometricServiceBase {
 
         @Override // Binder call
         public boolean hasEnrolledFaces(int userId, String opPackageName) {
-            checkPermission(USE_BIOMETRIC_INTERNAL, opPackageName);
+            checkPermission(USE_BIOMETRIC_INTERNAL);
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
@@ -1377,12 +1384,6 @@ public class FaceService extends BiometricServiceBase {
             Slog.e(TAG, "startRevokeChallenge failed", e);
         }
         return 0;
-    }
-
-    private void checkPermission(String permission, String packageName) {
-        if (!mCustomFaceService.isSupported() || !mCustomFaceService.getServicePackageName().equals(packageName)) {
-            checkPermission(permission);
-        }
     }
 
     private void dumpInternal(PrintWriter pw) {
