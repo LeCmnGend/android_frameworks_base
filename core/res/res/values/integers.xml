@@ -34,4 +34,5 @@
     <integer name="time_picker_mode_material">2</integer>
 
     <integer name="date_picker_header_max_lines_material">2</integer>
+
 </resources>
