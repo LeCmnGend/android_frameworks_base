@@ -87,6 +87,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -3022,7 +3023,7 @@ public class AccountManagerService
                              */
                             if (!checkKeyIntent(
                                     Binder.getCallingUid(),
-                                    intent)) {
+                                    result)) {
                                 onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                                         "invalid intent in bundle returned");
                                 return;
@@ -3088,8 +3089,7 @@ public class AccountManagerService
                     .setContentTitle(title)
                     .setContentText(subtitle)
                     .setContentIntent(PendingIntent.getActivityAsUser(mContext, 0, intent,
-                            PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                            null, user))
+                            PendingIntent.FLAG_CANCEL_CURRENT, null, user))
                     .build();
         installNotification(getCredentialPermissionNotificationId(
                 account, authTokenType, uid), n, "android", user.getIdentifier());
@@ -3429,11 +3429,10 @@ public class AccountManagerService
             Bundle.setDefusable(result, true);
             mNumResults++;
             Intent intent = null;
-            if (result != null
-                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+            if (result != null) {
                 if (!checkKeyIntent(
                         Binder.getCallingUid(),
-                        intent)) {
+                        result)) {
                     onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                             "invalid intent in bundle returned");
                     return;
@@ -4784,7 +4783,15 @@ public class AccountManagerService
          * into launching arbitrary intents on the device via by tricking to click authenticator
          * supplied entries in the system Settings app.
          */
-         protected boolean checkKeyIntent(int authUid, Intent intent) {
+        protected boolean checkKeyIntent(int authUid, Bundle bundle) {
+            if (!checkKeyIntentParceledCorrectly(bundle)) {
+            	EventLog.writeEvent(0x534e4554, "250588548", authUid, "");
+                return false;
+            }
+            Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
+            if (intent == null) {
+                return true;
+            }
             // Explicitly set an empty ClipData to ensure that we don't offer to
             // promote any Uris contained inside for granting purposes
             if (intent.getClipData() == null) {
@@ -4819,6 +4826,28 @@ public class AccountManagerService
             } finally {
                 Binder.restoreCallingIdentity(bid);
             }
+        }
+
+        /**
+         * Simulate the client side's deserialization of KEY_INTENT value, to make sure they don't
+         * violate our security policy.
+         *
+         * In particular we want to make sure the Authenticator doesn't trick users
+         * into launching arbitrary intents on the device via exploiting any other Parcel read/write
+         * mismatch problems.
+         */
+        private boolean checkKeyIntentParceledCorrectly(Bundle bundle) {
+            Parcel p = Parcel.obtain();
+            p.writeBundle(bundle);
+            p.setDataPosition(0);
+            Bundle simulateBundle = p.readBundle();
+            p.recycle();
+            Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
+            Intent simulateIntent = simulateBundle.getParcelable(AccountManager.KEY_INTENT);
+            if (intent == null) {
+                return (simulateIntent == null);
+            }
+            return intent.filterEquals(simulateIntent);
         }
 
         private boolean isExportedSystemActivity(ActivityInfo activityInfo) {
@@ -4963,11 +4992,10 @@ public class AccountManagerService
                     }
                 }
             }
-            if (result != null
-                    && (intent = result.getParcelable(AccountManager.KEY_INTENT)) != null) {
+            if (result != null) {
                 if (!checkKeyIntent(
                         Binder.getCallingUid(),
-                        intent)) {
+                        result)) {
                     onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                             "invalid intent in bundle returned");
                     return;
@@ -5320,8 +5348,7 @@ public class AccountManagerService
                         .setContentTitle(String.format(notificationTitleFormat, account.name))
                         .setContentText(message)
                         .setContentIntent(PendingIntent.getActivityAsUser(
-                                mContext, 0, intent,
-                                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT,
                                 null, new UserHandle(userId)))
                         .build();
                 installNotification(id, n, packageName, userId);
