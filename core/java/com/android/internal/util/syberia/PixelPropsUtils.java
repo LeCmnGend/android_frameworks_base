@@ -187,11 +187,12 @@ public class PixelPropsUtils {
                 spoofBuildGms();
             }
         }
-        if (Arrays.asList(packagesToKeep).contains(packageName)) {
-            return;
-        }
         if (packageName.startsWith("com.google.")
                 || Arrays.asList(extraPackagesToChange).contains(packageName)) {
+
+            if (Arrays.asList(packagesToKeep).contains(packageName)) {
+                return;
+            }
 
             Map<String, Object> propsToChange = new HashMap<>();
 
