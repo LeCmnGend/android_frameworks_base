@@ -797,7 +797,6 @@ public interface WindowManager extends ViewManager {
         @WindowType
         public int type;
 
-
         /**
          * Start of window types that represent normal application windows.
          */
