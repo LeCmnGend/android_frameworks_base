@@ -66,7 +66,7 @@ import java.util.Set;
 
 import javax.crypto.SecretKey;
 
-import com.android.internal.util.syberia.AttestationHooks;
+import com.android.internal.util.syberia.PixelPropsUtils;
 
 
 /**
@@ -116,7 +116,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     @Override
     public Certificate[] engineGetCertificateChain(String alias) {
-        AttestationHooks.onEngineGetCertificateChain();
+         PixelPropsUtils.onEngineGetCertificateChain();
 
         if (alias == null) {
             throw new NullPointerException("alias == null");

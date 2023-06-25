@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.android.internal.util.syberia.AttestationHooks;
+import com.android.internal.util.syberia.GamesPropsUtils;
 import com.android.internal.util.syberia.PixelPropsUtils;
 
 /**
@@ -1162,6 +1163,7 @@ public class Instrumentation {
         app.attach(context);
         String packageName = app.getPackageName();
         AttestationHooks.setProps(context);
+        GamesPropsUtils.setProps(context);
         PixelPropsUtils.setProps(context);
         return app;
     }
@@ -1182,6 +1184,7 @@ public class Instrumentation {
         app.attach(context);
         String packageName = app.getPackageName();
         AttestationHooks.setProps(context);
+        GamesPropsUtils.setProps(context);
         PixelPropsUtils.setProps(context);
         return app;
     }

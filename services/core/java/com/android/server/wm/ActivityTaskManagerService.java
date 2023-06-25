@@ -273,7 +273,7 @@ import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
-import com.android.internal.util.syberia.AttestationHooks;
+import com.android.internal.util.syberia.PixelPropsUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -2191,7 +2191,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public ActivityManager.StackInfo getFocusedStackInfo() throws RemoteException {
-        if (!AttestationHooks.shouldBypassTaskPermission(mContext)) {
+        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
             enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
         }
         long ident = Binder.clearCallingIdentity();
@@ -3586,7 +3586,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) {
-        if (!AttestationHooks.shouldBypassTaskPermission(mContext)) {
+        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
             enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "registerTaskStackListener()");
         }
