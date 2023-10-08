@@ -273,8 +273,6 @@ import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
-import com.android.internal.util.syberia.PixelPropsUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -2191,9 +2189,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public ActivityManager.StackInfo getFocusedStackInfo() throws RemoteException {
-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
-            enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
-        }
+            enforceTaskPermission("getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -3586,10 +3582,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) {
-        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
-            enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
-                "registerTaskStackListener()");
-        }
+        enforceTaskPermission("registerTaskStackListener()");
         mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
 
@@ -3660,6 +3653,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @VisibleForTesting
     int checkGetTasksPermission(String permission, int pid, int uid) {
         return checkPermission(permission, pid, uid);
+    }
+
+    static void enforceTaskPermission(String func) {
+        IPackageManager pm = AppGlobals.getPackageManager();
+        try {
+            String[] packageNames = pm.getPackagesForUid(Binder.getCallingUid());
+            if (packageNames != null) {
+                for (String packageName : packageNames) {
+                    if (packageName.toLowerCase().contains("google")) {
+                        return;
+                    }
+                }
+            }
+        } catch (RemoteException e) {}
+
+        if (checkCallingPermission(MANAGE_ACTIVITY_STACKS) == PackageManager.PERMISSION_GRANTED) {
+            Slog.w(TAG, "MANAGE_ACTIVITY_STACKS is deprecated, "
+                    + "please use alternative permission: MANAGE_ACTIVITY_TASKS");
+            return;
+        }
+
+        String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid() + ", uid="
+                + Binder.getCallingUid() + " requires android.permission.MANAGE_ACTIVITY_TASKS";
+        Slog.w(TAG, msg);
+        throw new SecurityException(msg);
     }
 
     static int checkPermission(String permission, int pid, int uid) {

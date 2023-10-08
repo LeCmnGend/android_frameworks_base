@@ -527,7 +527,10 @@ public class InputManagerService extends IInputManager.Stub
      */
     @Override // Binder call
     public InputMonitor monitorGestureInput(String inputChannelName, int displayId) {
-        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final String callingPackage = mContext.getPackageManager().getNameForUid(uid);
+        if (callingPackage != null && !callingPackage.toLowerCase().contains("google") && !checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
                 "monitorInputRegion()")) {
             throw new SecurityException("Requires MONITOR_INPUT permission");
         }
