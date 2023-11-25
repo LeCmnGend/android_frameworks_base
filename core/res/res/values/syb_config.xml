@@ -213,4 +213,7 @@
     <!-- Whether the device supports Smart Pixels -->
     <bool name="config_supportSmartPixels">false</bool>
 
+    <!-- Alter build parameters for avoiding hardware attestation enforcement -->
+    <string-array name="config_spoofBuildGms" translatable="false"></string-array>
+
 </resources>
