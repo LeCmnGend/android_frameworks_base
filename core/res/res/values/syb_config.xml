@@ -210,4 +210,7 @@
     <!-- Gaming Mode FPSInfoService FPS node file path -->
     <string name="config_gamingmode_fpsInfoSysNode" translatable="false"></string>
 
+    <!-- Alter build parameters for avoiding hardware attestation enforcement -->
+    <string-array name="config_spoofBuildGms" translatable="false"></string-array>
+
 </resources>
