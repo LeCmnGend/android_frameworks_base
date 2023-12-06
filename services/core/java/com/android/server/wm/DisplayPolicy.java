@@ -176,6 +176,8 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets.Side;
