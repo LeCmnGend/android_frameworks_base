@@ -43,7 +43,7 @@ public class TopIntroPreference extends Preference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        holder.setDividerAllowedAbove(true);
-        holder.setDividerAllowedBelow(true);
+        holder.setDividerAllowedAbove(false);
+        holder.setDividerAllowedBelow(false);
     }
 }
