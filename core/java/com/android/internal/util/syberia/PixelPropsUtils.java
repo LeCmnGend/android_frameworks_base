@@ -174,6 +174,13 @@ public class PixelPropsUtils {
         if (packageName == null || packageName.isEmpty()) {
             return;
         }
+        if (packageName.equals("com.google.android.gms")) {
+            final String processName = Application.getProcessName();
+            if (processName.equals("com.google.android.gms.unstable")) {
+                sIsGms = true;
+                spoofBuildGms();
+            }
+        }
         if (Arrays.asList(packagesToKeep).contains(packageName)) {
             return;
         }
